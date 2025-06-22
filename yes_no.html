@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>How To Answer Questions</title>
+  <link rel="stylesheet" href="gamepage.css">
+</head>
+<body>
+
+  <h1 id="question"></h1>
+  <h2 id="displayPrompt"></h2>
+
+  <!-- ✅ IDを追加 -->
+  <button id="answerButton" onclick="startRecognition()">Answer the Question</button>
+  <div id="result"></div>
+
+  <button id="nextButton" style="display:none;" onclick="setNewQuestion()">Next</button>
+
+  <script>
+    const soundStart = new Audio("sounds/pop.mp3");
+    const soundCorrect = new Audio("sounds/correct.mp3");
+    const soundWrong = new Audio("sounds/wrong.mp3");
+
+    const questions = [
+      {
+        text: "Do you like a dog?",
+        answers: {
+          yes: ["yes i do"],
+          no: ["no i don't"]
+        }
+      },
+      {
+        text: "Are you from Osaka?",
+        answers: {
+          yes: ["yes i am"],
+          no: ["no i am not", "no i'm not"]
+        }
+      },
+      {
+        text: "Can you play the piano?",
+        answers: {
+          yes: ["yes i can"],
+          no: ["no i cannnot", "no i can't"]
+        }
+      },
+      {
+        text: "Can you do shogi?",
+        answers: {
+          yes: ["yes i can"],
+          no: ["no i cannnot", "no i can't"]
+        }
+      },
+      {
+        text: "Do you and your brother watch TV?",
+        answers: {
+          yes: ["yes we do"],
+          no: ["no we don't"]
+        }
+      },
+      {
+        text: "Can you and your sister do karate?",
+        answers: {
+          yes: ["yes we can"],
+          no: ["no we can't", "no we can't"]
+        }
+      },
+      {
+        text: "Is Tom a student?",
+        answers: {
+          yes: ["yes he is"],
+          no: ["no he is not", "no he isn't"]
+        }
+      },
+      {
+        text: "Can Ken play the guitar?",
+        answers: {
+          yes: ["yes he can"],
+          no: ["no he cannot", "no he can't"]
+        }
+      },
+      {
+        text: "Can Lisa sing well?",
+        answers: {
+          yes: ["yes she can"],
+          no: ["no she cannot", "no she can't"]
+        }
+      },
+      {
+        text: "Is Emma a doctor?",
+        answers: {
+          yes: ["yes she is"],
+          no: ["no she is not", "no she isn't"]
+        }
+      },
+      {
+        text: "Do Jack and Nacy study math?",
+        answers: {
+          yes: ["yes they do"],
+          no: ["no they don't", "no they do not"]
+        }
+      },
+      {  
+        text: "Can Lisa and Tony drive a car?",
+        answers: {
+          yes: ["yes they can"],
+          no: ["no they can't", "no they cannot"]
+        }
+       },
+      {  
+        text: "Is this your pen?",
+        answers: {
+          yes: ["yes it is"],
+          no: ["no it is not", "no it isn't", "no it's not"]
+        }
+       },
+      {  
+        text: "Is that your car?",
+        answers: {
+          yes: ["yes it is"],
+          no: ["no it is not", "no it isn't", "no it's not"]
+        }
+       }
+
+    ];
+
+    let currentQuestion = null;
+    let expectedAnswers = [];
+
+    function setNewQuestion() {
+      document.getElementById('result').textContent = "";
+      document.getElementById('nextButton').style.display = "none";
+      document.getElementById('answerButton').style.display = "inline"; // ✅ 表示をリセット
+
+      currentQuestion = questions[Math.floor(Math.random() * questions.length)];
+      const prompt = Math.random() < 0.5 ? "Yes" : "No";
+
+      document.getElementById('question').textContent = currentQuestion.text;
+      document.getElementById('displayPrompt').textContent = prompt;
+
+      expectedAnswers = currentQuestion.answers[prompt.toLowerCase()];
+    }
+
+    function startRecognition() {
+      soundStart.play();
+
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.start();
+
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript.toLowerCase().trim();
+        const resultDiv = document.getElementById('result');
+
+        if (expectedAnswers.includes(transcript)) {
+          resultDiv.textContent = "Correct！";
+          soundCorrect.play();
+          document.getElementById('nextButton').style.display = "inline";
+          document.getElementById('answerButton').style.display = "none"; // ✅ 正解で非表示
+        } else {
+          resultDiv.textContent = "Let's try it again.";
+          soundWrong.play();
+          document.getElementById('nextButton').style.display = "none";
+        }
+      };
+
+      recognition.onerror = function(event) {
+        // エラー処理なし
+      };
+    }
+
+    window.onload = setNewQuestion;
+  </script>
+
+</body>
+</html>

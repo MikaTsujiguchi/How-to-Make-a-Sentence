@@ -1,0 +1,48 @@
+tml, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+  }
+  
+  body {
+    min-height: 100vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: #fff3b6;
+  }
+
+
+  .button-group {
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+button {
+  font-size: 1.5em;
+  padding: 5px 10px;
+  font-family: 'Comic Sans MS';
+  background-color: rgb(247, 89, 89);
+  font-weight: bold;
+  color: aliceblue;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: rgb(255, 14, 14);
+}
+
+  img {
+    height: 60vh;
+    margin-bottom: 30px;
+  }

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>English Practice</title>
+  <link rel="stylesheet" href="gamepage.css">
+</head>
+<body>
+
+  <h1 id="question"></h1>
+  <h2 id="displayPrompt"></h2>
+
+  <button id="answerButton" onclick="startRecognition()">Answer the Question</button>
+  <div id="result"></div>
+  <button id="nextButton" style="display:none;" onclick="setNewQuestion()">Next</button>
+
+  <script>
+    const soundStart = new Audio("sounds/pop.mp3");
+    const soundCorrect = new Audio("sounds/correct.mp3");
+    const soundWrong = new Audio("sounds/wrong.mp3");
+
+    const yesNoQuestions = [
+      {
+        text: "Do you like a dog?",
+        answers: { yes: ["yes i do"], no: ["no i don't"] }
+      },
+      {
+        text: "Are you from Osaka?",
+        answers: { yes: ["yes i am"], no: ["no i am not", "no i'm not"] }
+      },
+      {
+        text: "Can you play the piano?",
+        answers: { yes: ["yes i can"], no: ["no i cannot", "no i can't"] }
+      },
+      {
+        text: "Can you do shogi?",
+        answers: { yes: ["yes i can"], no: ["no i cannot", "no i can't"] }
+      },
+      {
+        text: "Do you and your brother watch TV?",
+        answers: { yes: ["yes we do"], no: ["no we don't"] }
+      },
+      {
+        text: "Can you and your sister do karate?",
+        answers: { yes: ["yes we can"], no: ["no we can't"] }
+      },
+      {
+        text: "Is Tom a student?",
+        answers: { yes: ["yes he is"], no: ["no he is not", "no he isn't"] }
+      },
+      {
+        text: "Can Ken play the guitar?",
+        answers: { yes: ["yes he can"], no: ["no he cannot", "no he can't"] }
+      },
+      {
+        text: "Can Lisa sing well?",
+        answers: { yes: ["yes she can"], no: ["no she cannot", "no she can't"] }
+      },
+      {
+        text: "Is Emma a doctor?",
+        answers: { yes: ["yes she is"], no: ["no she is not", "no she isn't"] }
+      },
+      {
+        text: "Do Jack and Nacy study math?",
+        answers: { yes: ["yes they do"], no: ["no they don't", "no they do not"] }
+      },
+      {
+        text: "Can Lisa and Tony drive a car?",
+        answers: { yes: ["yes they can"], no: ["no they can't", "no they cannot"] }
+      },
+      {
+        text: "Is this your pen?",
+        answers: { yes: ["yes it is"], no: ["no it is not", "no it isn't", "no it's not"] }
+      },
+      {
+        text: "Is that your car?",
+        answers: { yes: ["yes it is"], no: ["no it is not", "no it isn't", "no it's not"] }
+      }
+    ];
+
+    const rewriteQuestions = [
+      {
+        text: "I am a student.",
+        negative: ["i am not a student"],
+        question: ["are you a student"]
+      },
+      {
+        text: "He is a doctor.",
+        negative: ["he is not a doctor", "he isn't a doctor"],
+        question: ["is he a doctor"]
+      },
+      {
+        text: "She is my sister.",
+        negative: ["she is not my sister", "she isn't my sister"],
+        question: ["is she your sister"]
+      },
+      {
+        text: "They are my friends.",
+        negative: ["they are not my friends", "they aren't my friends"],
+        question: ["are they your friends"]
+      },
+      {
+        text: "You are a teacher.",
+        negative: ["you are not a teacher", "you aren't a teacher"],
+        question: ["are you a teacher"]
+      },
+      {
+        text: "This is a pen.",
+        negative: ["this is not a pen", "this isn't a pen"],
+        question: ["is this a pen"]
+      },
+      {
+        text: "That is my teacher.",
+        negative: ["that is not my teacher", "that isn't my teacher"],
+        question: ["is that your teacher"]
+      },
+      {
+        text: "I like baseball.",
+        negative: ["i do not like baseball", "i don't like baseball"],
+        question: ["do you like baseball"]
+      },
+      {
+        text: "Ken and Lisa study English.",
+        negative: ["ken and lisa don't study english", "ken and lisa do not study english"],
+        question: ["do ken and lisa study english"]
+      },
+      {
+        text: "You practice soccer every day.",
+        negative: ["you do not practice soccer everyday", "you don't practice soccer everyday"],
+        question: ["do you practice soccer everyday"]
+      }
+    ];
+
+    let currentQuestion = null;
+    let expectedAnswers = [];
+
+    function setNewQuestion() {
+      document.getElementById('result').textContent = "";
+      document.getElementById('nextButton').style.display = "none";
+      document.getElementById('answerButton').style.display = "inline";
+
+      const isYesNo = Math.random() < 0.5;
+
+      if (isYesNo) {
+        // Yes/Noタイプ
+        currentQuestion = yesNoQuestions[Math.floor(Math.random() * yesNoQuestions.length)];
+        const prompt = Math.random() < 0.5 ? "yes" : "no";
+        document.getElementById('question').textContent = currentQuestion.text;
+        document.getElementById('displayPrompt').textContent = prompt.toUpperCase();
+        expectedAnswers = currentQuestion.answers[prompt];
+      } else {
+        // 書き換えタイプ
+        currentQuestion = rewriteQuestions[Math.floor(Math.random() * rewriteQuestions.length)];
+        const promptType = Math.random() < 0.5 ? "negative" : "question";
+        document.getElementById('question').textContent = currentQuestion.text;
+        document.getElementById('displayPrompt').textContent = promptType === "negative" ? "否定文" : "疑問文";
+        expectedAnswers = currentQuestion[promptType];
+      }
+    }
+
+    function startRecognition() {
+      soundStart.play();
+
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.start();
+
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript.toLowerCase().trim();
+        const resultDiv = document.getElementById('result');
+
+        if (expectedAnswers.includes(transcript)) {
+          resultDiv.textContent = "Correct!";
+          soundCorrect.play();
+          document.getElementById('nextButton').style.display = "inline";
+          document.getElementById('answerButton').style.display = "none";
+        } else {
+          resultDiv.textContent = "Let's try it again.";
+          soundWrong.play();
+        }
+      };
+
+      recognition.onerror = function(event) {
+        console.error("Speech recognition error:", event.error);
+      };
+    }
+
+    window.onload = setNewQuestion;
+  </script>
+
+</body>
+</html>

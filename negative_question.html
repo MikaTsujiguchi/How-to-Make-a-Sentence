@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Make Negative or Question</title>
+  <link rel="stylesheet" href="gamepage.css">
+</head>
+<body>
+  <h1 id="question"></h1>
+  <h2 id="displayPrompt"></h2>
+  
+
+  <button id="answerButton" onclick="startRecognition()">Answer the Question</button>
+  <div id="result"></div>
+
+  <button id="nextButton" style="display:none;" onclick="setNewQuestion()">Next</button>
+
+  <script>
+    const soundStart = new Audio("sounds/pop.mp3");
+    const soundCorrect = new Audio("sounds/correct.mp3");
+    const soundWrong = new Audio("sounds/wrong.mp3");
+
+    const questions = [
+      {
+        text: "I am a student.",
+        negative: ["i am not a student"],
+        question: ["are you a student"]
+      },
+      {
+        text: "He is a doctor.",
+        negative: ["he is not a doctor", "he isn't a doctor"],
+        question: ["is he a doctor"]
+      },
+      {
+        text: "She is my sister.",
+        negative: ["she is not my sister", "she isn't my sister"],
+        question: ["is she your sister"]
+      },
+      {
+        text: "They are my friends.",
+        negative: ["they are not my friends", "they aren't my friends"],
+        question: ["are they your friends"]
+      },
+      {
+        text: "You are a teacher.",
+        negative: ["you are not a teacher", "you aren't a teacher"],
+        question: ["are you a teacher"]
+      },
+      {
+        text: "This is a pen.",
+        negative: ["this is not a pen", "this isn't a pen"],
+        question: ["is this a pen"]
+      },
+      {
+        text: "That is my teacher.",
+        negative: ["that is not my teacher", "that isn't my teacher","that's not my teacher"],
+        question: ["is that your teacher"]
+      },
+      {
+        text: "I like baseball.",
+        negative: ["i do not like baseball", "i don't like baseball"],
+        question: ["do you like baseball"]
+      }
+      ,
+      {
+        text: "Ken and Lisa study English.",
+        negative: ["ken and lisa don't study english", "ken and lisa do not study english"],
+        question: ["do ken and lisa study english"]
+      },
+      {
+        text: "You practice soccer every day.",
+        negative: ["you do not practice soccer everyday", "you don't practice soccer everyday"],
+        question: ["do you practice soccer everyday"]
+      }
+    ];
+
+    let currentQuestion = null;
+    let expectedAnswers = [];
+
+    function setNewQuestion() {
+      document.getElementById('result').textContent = "";
+      document.getElementById('nextButton').style.display = "none";
+      document.getElementById('answerButton').style.display = "inline";
+
+      currentQuestion = questions[Math.floor(Math.random() * questions.length)];
+      const promptType = Math.random() < 0.5 ? "negative" : "question";
+
+      document.getElementById('question').textContent = currentQuestion.text;
+      document.getElementById('displayPrompt').textContent = promptType === "negative" ? "否定文" : "疑問文";
+
+      expectedAnswers = currentQuestion[promptType];
+    }
+
+    function startRecognition() {
+      soundStart.play();
+
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'en-US';
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.start();
+
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript.toLowerCase().trim();
+        const resultDiv = document.getElementById('result');
+
+        if (expectedAnswers.includes(transcript)) {
+          resultDiv.textContent = "Correct！";
+          soundCorrect.play();
+          document.getElementById('nextButton').style.display = "inline";
+          document.getElementById('answerButton').style.display = "none";
+        } else {
+          resultDiv.textContent = "Let's try it again.";
+          soundWrong.play();
+        }
+      };
+
+      recognition.onerror = function(event) {
+        console.error("Speech recognition error:", event.error);
+      };
+    }
+
+    window.onload = setNewQuestion;
+  </script>
+
+</body>
+</html>
